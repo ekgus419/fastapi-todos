@@ -15,7 +15,7 @@ router = APIRouter(prefix="/todos")
 @router.get("", status_code=200)
 def get_todos_handler(
     order: str | None = None,
-    todo_repo: ToDoRepository = Depends(ToDoRepository)
+    todo_repo: ToDoRepository = Depends()
 ) -> ToDoListChema:
     todos: List[ToDo] = todo_repo.get_todos()
     if order and order == "DESC":
@@ -30,7 +30,7 @@ def get_todos_handler(
 @router.get("/{todo_id}", status_code=200)
 def get_todo_handler(
     todo_id: int,
-    todo_repo: ToDoRepository = Depends(ToDoRepository),
+    todo_repo: ToDoRepository = Depends(),
 ) -> ToDoSchema:
     todo: ToDo | None = todo_repo.get_todo_by_todo_id(todo_id=todo_id)
     if todo:
@@ -41,7 +41,7 @@ def get_todo_handler(
 @router.post("", status_code=201)
 def create_todo_handler(
     request: CreateTodoRequest,
-    todo_repo: ToDoRepository = Depends(ToDoRepository),
+    todo_repo: ToDoRepository = Depends(),
 ) -> ToDoSchema:
     todo: ToDo = ToDo.create(request=request) # in=None
     todo: ToDo = todo_repo.create_todo(todo=todo) # id=int
@@ -52,7 +52,7 @@ def create_todo_handler(
 def update_todo_handler(
     todo_id: int,
     is_done: bool = Body(..., embed=True),
-    todo_repo: ToDoRepository = Depends(ToDoRepository),
+    todo_repo: ToDoRepository = Depends(),
 ):
     todo: ToDo | None = todo_repo.get_todo_by_todo_id(todo_id=todo_id)
     if todo:
@@ -66,7 +66,7 @@ def update_todo_handler(
 @router.delete("/{todo_id}", status_code=204)
 def delete_todo_handler(
     todo_id: int,
-    todo_repo: ToDoRepository = Depends(ToDoRepository),
+    todo_repo: ToDoRepository = Depends(),
 ):
     todo: ToDo | None = todo_repo.get_todo_by_todo_id(todo_id=todo_id)
     if not todo:
