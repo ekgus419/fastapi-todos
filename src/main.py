@@ -14,7 +14,7 @@ app = FastAPI()
 def health_check_handler():
     return {"ping" : "pong"}
 
-refactor @app.get("/todos", status_code=200)
+@app.get("/todos", status_code=200)
 def get_todos_handler(
     order: str | None = None,
     session: Session = Depends(get_db),
