@@ -2,10 +2,12 @@ from typing import List
 
 from database.connection import get_db
 from database.orm import ToDo
-from database.repository import ToDoRepository
+from database.repository import ToDoRepository, UserRepository
 from fastapi import Depends, HTTPException, Body, APIRouter
 from schema.request import CreateTodoRequest
 from schema.response import ToDoListChema, ToDoSchema
+from security import get_access_token
+from service.user import UserService
 from sqlalchemy.orm import Session
 
 
@@ -14,10 +16,20 @@ router = APIRouter(prefix="/todos")
 
 @router.get("", status_code=200)
 def get_todos_handler(
+    access_token: str = Depends(get_access_token),
     order: str | None = None,
-    todo_repo: ToDoRepository = Depends()
+    user_service: UserService = Depends(),
+    todo_repo: ToDoRepository = Depends(),
+    user_repo: UserRepository = Depends(),
 ) -> ToDoListChema:
-    todos: List[ToDo] = todo_repo.get_todos()
+
+    usernname: str = user_service.decode_jwt(access_token=access_token)
+    user: User | None = user_repo.get_user_by_username(username=usernname)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User Not found")
+
+    todos: List[ToDo] = user.todos
     if order and order == "DESC":
         return ToDoListChema(
             todos=[ToDoSchema.from_orm(todo) for todo in todos[::-1]]
